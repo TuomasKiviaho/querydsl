@@ -201,10 +201,10 @@
                   <dumpDetails>true</dumpDetails>
                   <previousVersion>3.3.2</previousVersion>
                 </requireBackwardCompatibility>
-                <requireSemanticVersioningConformance implementation="org.semver.enforcer.RequireSemanticVersioningConformance">
+                <!--<requireSemanticVersioningConformance implementation="org.semver.enforcer.RequireSemanticVersioningConformance">
                   <dumpDetails>true</dumpDetails>
                   <previousVersion>3.3.2</previousVersion>
-                </requireSemanticVersioningConformance>
+                </requireSemanticVersioningConformance>-->
               </rules>
             </configuration>
           </execution>
