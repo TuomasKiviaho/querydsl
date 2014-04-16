@@ -107,7 +107,7 @@
       <version>${sqlite.version}</version>
       <scope>test</scope>
     </dependency>
-   
+   <!--
     <dependency>
       <groupId>com.teradata</groupId>
       <artifactId>teradata-jdbc</artifactId>
@@ -119,7 +119,7 @@
       <artifactId>teradata-config</artifactId>
       <version>${teradata.version}</version>
       <scope>test</scope>
-    </dependency>
+    </dependency>-->
             
     <dependency>
       <groupId>com.mysema.querydsl</groupId>
