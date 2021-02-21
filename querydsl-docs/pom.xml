@@ -3,19 +3,21 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.mysema.querydsl</groupId>
+    <groupId>com.querydsl</groupId>
     <artifactId>querydsl-root</artifactId>
-    <version>3.2.1</version>
-    <relativePath>../querydsl-root/pom.xml</relativePath>
+    <version>5.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.mysema.querydsl</groupId>
+  <groupId>com.querydsl</groupId>
   <artifactId>querydsl-docs</artifactId>
   <name>Querydsl - Documentation</name>
   <packaging>jdocbook</packaging>
   
   <properties>
+    <translation>en-US</translation>
     <xslthl.config>http://docbook.sourceforge.net/release/xsl/current/highlighting/xslthl-config.xml</xslthl.config>
+    <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
   <build>
@@ -26,6 +28,7 @@
         <version>2.3.5</version>
         <extensions>true</extensions>
         <configuration>
+          <masterTranslation>${translation}</masterTranslation>
           <sourceDocumentName>Querydsl_Reference.xml</sourceDocumentName>
           <imageResource>
             <directory>${basedir}/src/main/docbook</directory>
@@ -88,5 +91,28 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
+
+  <repositories>
+    <repository>
+      <id>jboss</id>
+      <url>https://repository.jboss.org/nexus/content/repositories/releases</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>jboss-thirdparty</id>
+      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
 </project>

@@ -6,47 +6,53 @@ The JPA module provides integration with the JPA 2 persistence API.
 
  Add the following dependencies to your Maven project :
 
-    <dependency>
-      <groupId>com.mysema.querydsl</groupId>
-      <artifactId>querydsl-apt</artifactId>
-      <version>${querydsl.version}</version>
-      <scope>provided</scope>
-    </dependency>    
-        
-    <dependency>
-      <groupId>com.mysema.querydsl</groupId>
-      <artifactId>querydsl-jpa</artifactId>
-      <version>${querydsl.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.1</version>
-    </dependency>   
+```XML
+<dependency>
+  <groupId>com.querydsl</groupId>
+  <artifactId>querydsl-jpa</artifactId>
+  <version>${querydsl.version}</version>
+</dependency>
+```
 
 And now, configure the Maven APT plugin :
 
-    <plugin>
-      <groupId>com.mysema.maven</groupId>
-      <artifactId>apt-maven-plugin</artifactId>
-      <version>1.0.6</version>
-      <executions>
-        <execution>
-          <goals>
-            <goal>process</goal>
-          </goals>
-          <configuration>
-            <outputDirectory>target/generated-sources/java</outputDirectory>
-            <processor>com.mysema.query.apt.jpa.JPAAnnotationProcessor</processor>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
+```XML
+<project>
+  <build>
+    <plugins>
+      ...
+      <plugin>
+        <groupId>com.mysema.maven</groupId>
+        <artifactId>apt-maven-plugin</artifactId>
+        <version>1.1.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/generated-sources/java</outputDirectory>
+              <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      ...
+    </plugins>
+  </build>
+</project>
+```
 
 The JPAAnnotationProcessor finds domain types annotated with the javax.persistence.Entity annotation and generates query types for them.
 
-If you use Hibernate annotations in your domain types you should use the APT processor com.mysema.query.apt.hibernate.HibernateAnnotationProcessor instead.
+If you use Hibernate annotations in your domain types you should use the APT processor com.querydsl.apt.hibernate.HibernateAnnotationProcessor instead.
 
 Run clean install and you will get your Query types generated into target/generated-sources/java.
 
@@ -58,10 +64,13 @@ Now you are able to construct JPQL query instances and instances of the query do
 
 Querying with Querydsl JPA is as simple as this :
 
-    QCustomer customer = QCustomer.customer;
-    JPAQuery query = new JPAQuery(entityManager);
-    Customer bob = query.from(customer)
-      .where(customer.firstName.eq("Bob"))
-      .uniqueResult(customer);
-      
-For more information on the Querydsl JPA module visit the reference documentation http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration      
+```JAVA
+QCustomer customer = QCustomer.customer;
+JPAQuery<?> query = new JPAQuery<Void>(entityManager);
+Customer bob = query.select(customer)
+  .from(customer)
+  .where(customer.firstName.eq("Bob"))
+  .fetchOne();
+```
+
+For more information on the Querydsl JPA module visit the reference documentation http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration

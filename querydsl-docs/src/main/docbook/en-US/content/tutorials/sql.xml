@@ -16,27 +16,21 @@
 
     <programlisting language="xml"><![CDATA[
 <dependency>
-  <groupId>com.mysema.querydsl</groupId>
+  <groupId>com.querydsl</groupId>
   <artifactId>querydsl-sql</artifactId>
   <version>${querydsl.version}</version>
-</dependency>    
-        
+</dependency>
+
 <dependency>
-  <groupId>com.mysema.querydsl</groupId>
+  <groupId>com.querydsl</groupId>
   <artifactId>querydsl-sql-codegen</artifactId>
   <version>${querydsl.version}</version>
   <scope>provided</scope>
 </dependency>
-
-<dependency>
-  <groupId>org.slf4j</groupId>
-  <artifactId>slf4j-log4j12</artifactId>
-  <version>1.6.1</version>
-</dependency>   
 ]]></programlisting>
 
     <para>The querydsl-sql-codegen dependency can be skipped, if code generation happens
-      via Maven or Ant.</para>
+      via Maven.</para>
 
   </sect2>
 
@@ -47,38 +41,45 @@
     <para>This functionality should be primarily used via the Maven plugin. Here is an example:
     </para>
 
-    <programlisting language="xml"><![CDATA[   
-<plugin>
-  <groupId>com.mysema.querydsl</groupId>
-  <artifactId>querydsl-maven-plugin</artifactId>
-  <version>${querydsl.version}</version>
-  <executions>
-    <execution>
-      <goals>
-        <goal>export</goal>
-      </goals>
-    </execution>            
-  </executions>
-  <configuration>
-    <jdbcDriver>org.apache.derby.jdbc.EmbeddedDriver</jdbcDriver>
-    <jdbcUrl>jdbc:derby:target/demoDB;create=true</jdbcUrl>
-    <packageName>com.myproject.domain</packageName>
-    <targetFolder>${project.basedir}/target/generated-sources/java</targetFolder>
-  </configuration>
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>${derby.version}</version>
-    </dependency>
-  </dependencies>
-</plugin>  
+    <programlisting language="xml"><![CDATA[
+<project>
+  <build>
+    <plugins>
+      ...
+      <plugin>
+        <groupId>com.querydsl</groupId>
+        <artifactId>querydsl-maven-plugin</artifactId>
+        <version>${querydsl.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>export</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <jdbcDriver>org.apache.derby.jdbc.EmbeddedDriver</jdbcDriver>
+          <jdbcUrl>jdbc:derby:target/demoDB;create=true</jdbcUrl>
+          <packageName>com.myproject.domain</packageName>
+          <targetFolder>${project.basedir}/target/generated-sources/java</targetFolder>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>${derby.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      ...
+    </plugins>
+  </build>
+</project>
 ]]></programlisting>
 
     <para>
       Use the goal <emphasis>test-export</emphasis>
-      to add the targetFolder as a test compile source root
-      instead of a compile source root.
+      to treat the target folder as a test source folder for use with test code.
     </para>
 
     <table>
@@ -152,18 +153,23 @@
           </row>
           <row>
             <entry>schemaPattern</entry>
-            <entry>a schema name pattern; must match the schema name as it is stored in the database;
+            <entry>a schema name pattern in LIKE pattern form; must match the schema name as it is stored in the database,
+              multiple can be separated by comma
               (default: null)</entry>
           </row>
           <row>
             <entry>tableNamePattern</entry>
-            <entry>a table name pattern; must match the table name as it is stored in the database, 
+            <entry>a table name pattern in LIKE pattern form; must match the table name as it is stored in the database,
               multiple can be separated by comma
               (default: null)</entry>
           </row>
           <row>
             <entry>targetFolder</entry>
-            <entry>target folder where source filder should be generated</entry>
+            <entry>target folder where sources should be generated</entry>
+          </row>
+          <row>
+            <entry>beansTargetFolder</entry>
+            <entry>target folder where bean sources should be generated, defaults to the same value as targetFolder</entry>
           </row>
           <row>
             <entry>namingStrategyClass</entry>
@@ -222,8 +228,20 @@
             <entry>export primary keys (default: true)</entry>
           </row>
           <row>
+            <entry>tableTypesToExport</entry>
+            <entry>Comma-separated list of table types to export (allowable values will depend on JDBC driver).  Allows for arbitrary set of types to be exported, e.g.: "TABLE, MATERIALIZED VIEW". The exportTables and exportViews parameters will be ignored if this parameter is set. (default: none)</entry>
+          </row>
+          <row>
             <entry>exportForeignKeys</entry>
             <entry>export foreign keys (default: true)</entry>
+          </row>
+          <row>
+            <entry>exportDirectForeignKeys</entry>
+            <entry>export direct foreign keys (default: true)</entry>
+          </row>
+          <row>
+            <entry>exportInverseForeignKeys</entry>
+            <entry>export inverse foreign keys (default: true)</entry>
           </row>
           <row>
             <entry>customTypes</entry>
@@ -239,24 +257,32 @@
           </row>
           <row>
             <entry>imports</entry>
-            <entry>Array of java imports added to generated query classes: <emphasis>com.bar</emphasis> for package (without .* notation), <emphasis>com.bar.Foo</emphasis> for class (default: empty)
+            <entry>Array of java imports added to generated query classes: <emphasis>com.bar</emphasis> for package (without .* notation), <emphasis>com.bar.Foo</emphasis> for class (default: empty)</entry>
+          </row>
+          <row>
+            <entry>generatedAnnotationClass</entry>
+            <entry>
+              The fully qualified class name of the <emphasis>Single-Element Annotation</emphasis> (with String element) to be added on the generated sources. Build in
+              <emphasis>com.querydsl.core.annotations.Generated</emphasis>has CLASS retention which can be used for byte code analysis tools like Jacoco.
+              (default: <emphasis>javax.annotation.Generated</emphasis> or<emphasis>javax.annotation.processing.Generated</emphasis> depending on the java version). See also
+              <ulink url="https://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-9.7.3">Single-Element Annotation</ulink>
             </entry>
           </row>
         </tbody>
       </tgroup>
     </table>
-    
+
     <para>Custom types can be used to register additional Type implementations:</para>
-    
-<programlisting language="xml"><![CDATA[       
+
+<programlisting language="xml"><![CDATA[
 <customTypes>
-  <customType>com.mysema.query.sql.types.InputStreamType</customType>
+  <customType>com.querydsl.sql.types.InputStreamType</customType>
 </customTypes>
-]]></programlisting>       
+]]></programlisting>
 
     <para>Type mappings can be used to register table.column specific java types:</para>
-    
-<programlisting language="xml"><![CDATA[       
+
+<programlisting language="xml"><![CDATA[
 <typeMappings>
   <typeMapping>
     <table>IMAGE</table>
@@ -264,11 +290,10 @@
     <type>java.io.InputStream</type>
   </typeMapping>
 </typeMappings>
-]]></programlisting>       
-   
+]]></programlisting>
 
     <para>The defaults for the numeric mappings are </para>
-    
+
     <table>
       <title>Numeric mappings</title>
       <tgroup cols='3' align='left' colsep='1' rowsep='1'>
@@ -276,8 +301,8 @@
         <colspec colname='Descriptions' colwidth="1*" />
         <thead>
           <row>
-            <entry>Size</entry>
-            <entry>Digits</entry>
+            <entry>Total digits</entry>
+            <entry>Decimal digits</entry>
             <entry>Type</entry>
           </row>
         </thead>
@@ -308,32 +333,65 @@
             <entry>Byte</entry>
           </row>
           <row>
-            <entry>&gt; 16</entry>
+            <entry>&gt; 0</entry>
             <entry>&gt; 0</entry>
             <entry>BigDecimal</entry>
           </row>
-          <row>
-            <entry>&gt; 0</entry>
-            <entry>&gt; 0</entry>
-            <entry>Double</entry>
-          </row>      
         </tbody>
       </tgroup>
-    </table>          
-    
-    <para>They can be customized for specific size/digits combinations like this:</para>
-    
-<programlisting language="xml"><![CDATA[    
+    </table>
+
+    <para>They can be customized for specific total/decimal digits combinations like this:</para>
+
+<programlisting language="xml"><![CDATA[
 <numericMappings>
   <numericMapping>
-    <size>1</size>
-    <digits>0</digits>
+    <total>1</total>
+    <decimal>0</decimal>
     <javaType>java.lang.Byte</javaType>
   </numericMapping>
-</numericMappings>   
-]]></programlisting>          
-    
+</numericMappings>
+]]></programlisting>
+
     <para>Imports can be used to add cross-schema foreign keys support.</para>
+
+    <para>Schemas, tables and columns can also be renamed using the plugin. Here are some examples:</para>
+    <para>Renaming a schema:</para>
+    <programlisting language="xml"><![CDATA[
+<renameMappings>
+  <renameMapping>
+    <fromSchema>PROD</fromSchema>
+    <toSchema>TEST</toSchema>
+  </renameMapping>
+</renameMappings>
+]]></programlisting>
+
+    <para>Renaming a table:</para>
+    <programlisting language="xml"><![CDATA[
+<renameMappings>
+  <renameMapping>
+    <fromSchema>PROD</fromSchema>
+    <fromTable>CUSTOMER</fromTable>
+    <toTable>CSTMR</toTable>
+  </renameMapping>
+</renameMappings>
+]]></programlisting>
+
+    <para>Renaming a column:</para>
+    <programlisting language="xml"><![CDATA[
+<renameMappings>
+  <renameMapping>
+    <fromSchema>PROD</fromSchema>
+    <fromTable>CUSTOMER</fromTable>
+    <fromColumn>ID</fromColumn>
+    <toColumn>IDX</toTable>
+  </renameMapping>
+</renameMappings>
+]]></programlisting>
+
+    <para>Note: fromSchema can be omitted when renaming tables and columns.</para>
+
+    <para>Compared to APT based code generation certain functionality is not available such as QueryDelegate annotation handling.</para>
 
   </sect2>
 
@@ -342,10 +400,32 @@
     <title>Code generation via ANT</title>
 
     <para>
-      The ANT task <code>com.mysema.query.sql.ant.AntMetaDataExporter</code>
+      The ANT task <code>com.querydsl.sql.codegen.ant.AntMetaDataExporter</code>
       of the querydsl-sql module provides the same functionality as an ANT task.
-      The configuration parameters of the task are the same as for the Maven plugin.
+      The configuration parameters of the task are the same as for the Maven plugin, except for the composite types.
     </para>
+
+    <para>
+      The composite types are used without the wrapper element like in this example.
+    </para>
+
+<programlisting language="xml"><![CDATA[
+<project name="testproject" default="codegen" basedir=".">
+
+  <taskdef name="codegen" classname="com.querydsl.sql.codegen.ant.AntMetaDataExporter"/>
+
+  <target name="codegen">
+    <codegen
+      jdbcDriver="org.h2.Driver"
+      jdbcUser="sa"
+      jdbcUrl="jdbc:h2:/dbs/db1"
+      packageName="test"
+      targetFolder="target/generated-sources/java">
+      <renameMapping fromSchema="PUBLIC" toSchema="PUB"/>
+    </codegen>
+  </target>
+</project>
+]]></programlisting>
 
   </sect2>
 
@@ -355,12 +435,12 @@
 
     <para>To get started export your schema into Querydsl query types like this:</para>
 
-    <programlisting language="java"><![CDATA[  
+    <programlisting language="java"><![CDATA[
 java.sql.Connection conn = ...;
 MetaDataExporter exporter = new MetaDataExporter();
 exporter.setPackageName("com.myproject.mydomain");
 exporter.setTargetFolder(new File("target/generated-sources/java"));
-exporter.export(conn.getMetaData());  
+exporter.export(conn.getMetaData());
 ]]></programlisting>
 
     <para>This declares that the database schema is to be mirrored into the
@@ -369,27 +449,28 @@ exporter.export(conn.getMetaData());
 
     <para>
       The generated types have the table name transformed to mixed case as the class name and a
-      similar mixed case transformation applied to the columns which are available as property 
+      similar mixed case transformation applied to the columns which are available as property
       paths in the query type.
     </para>
 
     <para>
-      In addition to this primary key and foreign key constraints are provided as fields 
+      In addition to this primary key and foreign key constraints are provided as fields
       which can be used for compact join declarations.
     </para>
 
   </sect2>
-  
+
   <sect2>
-  
+
     <title>Configuration</title>
-    
-    <para>The configuration is done via the com.mysema.query.sql.Configuration class which takes the
-    Querydsl SQL dialect as an argument. For H2 you would create it like this</para>
-    
-    <programlisting language="java"><![CDATA[ 
+
+    <para>The configuration is done via the com.querydsl.sql.Configuration class which takes
+      the
+      Querydsl SQL dialect as an argument. For H2 you would create it like this</para>
+
+    <programlisting language="java"><![CDATA[
 SQLTemplates templates = new H2Templates();
-Configuration configuration = new Configuration(templates);     
+Configuration configuration = new Configuration(templates);
 ]]></programlisting>
 
     <para>Querydsl uses SQL dialects to customize the SQL serialization needed for
@@ -398,16 +479,22 @@ Configuration configuration = new Configuration(templates);
 
     <itemizedlist>
       <listitem>
-        <para>CUBRIDTemplates (tested with 8.4)</para>
+        <para>CUBRIDTemplates (tested with CUBRID 8.4)</para>
       </listitem>
       <listitem>
-        <para>DerbyTemplates (tested with 10.8.2.2)</para>
+        <para>DB2Templates (tested with DB2 10.1.2)</para>
       </listitem>
       <listitem>
-        <para>HSQLDBTemplates (tested with 2.2.4)</para>
+        <para>DerbyTemplates (tested with Derby 10.8.2.2)</para>
       </listitem>
       <listitem>
-        <para>H2Templates (tested with 1.3.164)</para>
+        <para>FirebirdTemplates (tested with Firebird 2.5)</para>
+      </listitem>
+      <listitem>
+        <para>HSQLDBTemplates (tested with HSQLDB 2.2.4)</para>
+      </listitem>
+      <listitem>
+        <para>H2Templates (tested with H2 1.3.164)</para>
       </listitem>
       <listitem>
         <para>MySQLTemplates (tested with MySQL 5.5)</para>
@@ -416,7 +503,7 @@ Configuration configuration = new Configuration(templates);
         <para>OracleTemplates (test with Oracle 10 and 11)</para>
       </listitem>
       <listitem>
-        <para>PostgresTemplates (tested with 9.1)</para>
+        <para>PostgreSQLTemplates (tested with PostgreSQL 9.1)</para>
       </listitem>
       <listitem>
         <para>SQLiteTemplates (tested with xerial JDBC 3.7.2)</para>
@@ -436,11 +523,11 @@ Configuration configuration = new Configuration(templates);
       <listitem>
         <para>TeradataTemplates (tested with Teradata 14)</para>
       </listitem>
-      
-    </itemizedlist>    
-    
-    <para>For customized SQLTemplates instances you can use the builder pattern like this</para>    
-  
+
+    </itemizedlist>
+
+    <para>For customized SQLTemplates instances you can use the builder pattern like this</para>
+
   <programlisting language="java"><![CDATA[
   H2Templates.builder()
      .printSchema() // to include the schema in the output
@@ -448,27 +535,33 @@ Configuration configuration = new Configuration(templates);
      .newLineToSingleSpace() // to replace new lines with single space in the output
      .escape(ch)    // to set the escape char
      .build();      // to get the customized SQLTemplates instance
-]]></programlisting>  
+]]></programlisting>
 
     <para>The methods of the Configuration class can be used to enable direct serialization of literals
     via setUseLiterals(true), override schema and tables and register custom types. For full details look
     at the javadocs of Configuration.</para>
-  
+
   </sect2>
 
   <sect2>
 
     <title>Querying</title>
 
+    <para>For the following examples we will be using the <code>SQLQueryFactory</code> class for query creation.
+      Using it results in more concise code compared to constructor based query creation.</para>
+
+    <programlisting language="java"><![CDATA[
+SQLQueryFactory queryFactory = new SQLQueryFactory(configuration, dataSource);
+]]></programlisting>
+
     <para>Querying with Querydsl SQL is as simple as this:</para>
 
-    <programlisting language="java"><![CDATA[ 
+    <programlisting language="java"><![CDATA[
 QCustomer customer = new QCustomer("c");
 
-SQLQuery query = new SQLQuery(connection, configuration); 
-List<String> lastNames = query.from(customer)
+List<String> lastNames = queryFactory.select(customer.lastName).from(customer)
     .where(customer.firstName.eq("Bob"))
-    .list(customer.lastName);
+    .fetch();
 ]]></programlisting>
 
     <para>
@@ -478,11 +571,11 @@ List<String> lastNames = query.from(customer)
       and <emphasis>last_name</emphasis>:
     </para>
 
-    <programlisting><![CDATA[     
-SELECT c.last_name 
-FROM customer c 
+    <programlisting><![CDATA[
+SELECT c.last_name
+FROM customer c
 WHERE c.first_name = 'Bob'
-]]></programlisting>  
+]]></programlisting>
 
   </sect2>
 
@@ -493,12 +586,17 @@ WHERE c.first_name = 'Bob'
     <para>Use the the cascading methods of the SQLQuery class like this</para>
 
     <para>
+      <emphasis>select:</emphasis>
+      Set the projection of the query. (Not necessary if created via query factory)
+    </para>
+
+    <para>
       <emphasis>from:</emphasis>
       Add the query sources here.
     </para>
 
     <para>
-      <emphasis>innerJoin, join, leftJoin, fullJoin, on:</emphasis>
+      <emphasis>innerJoin, join, leftJoin, rightJoin, fullJoin, on:</emphasis>
       Add join elements using these constructs.
       For the join methods the first argument is the join source and the second the target
       (alias).
@@ -542,28 +640,31 @@ WHERE c.first_name = 'Bob'
 
     <para>Joins are constructed using the following syntax:</para>
 
-    <programlisting language="java"><![CDATA[ 
+    <programlisting language="java"><![CDATA[
 QCustomer customer = QCustomer.customer;
 QCompany company = QCompany.company;
-query.from(customer)
+queryFactory.select(customer.firstName, customer.lastName, company.name)
+    .from(customer)
     .innerJoin(customer.company, company)
-    .list(customer.firstName, customer.lastName, company.name);
+    .fetch();
 ]]></programlisting>
 
     <para>and for a left join:</para>
 
-    <programlisting language="java"><![CDATA[ 
-query.from(customer)
+    <programlisting language="java"><![CDATA[
+queryFactory.select(customer.firstName, customer.lastName, company.name)
+    .from(customer)
     .leftJoin(customer.company, company)
-    .list(customer.firstName, customer.lastName, company.name);
+    .fetch();
 ]]></programlisting>
 
     <para>Alternatively the join condition can also be written out:</para>
 
-    <programlisting language="java"><![CDATA[ 
-query.from(customer)
-    .leftJoin(company).on(customer.company.eq(company.id))
-    .list(customer.firstName, customer.lastName, company.name);
+    <programlisting language="java"><![CDATA[
+queryFactory.select(customer.firstName, customer.lastName, company.name)
+    .from(customer)
+    .leftJoin(company).on(customer.company.eq(company))
+    .fetch();
 ]]></programlisting>
 
   </sect2>
@@ -575,17 +676,18 @@ query.from(customer)
 
     <para>The syntax for declaring ordering is </para>
 
-    <programlisting language="java"><![CDATA[ 
-query.from(customer)
+    <programlisting language="java"><![CDATA[
+queryFactory.select(customer.firstName, customer.lastName)
+    .from(customer)
     .orderBy(customer.lastName.asc(), customer.firstName.asc())
-    .list(customer.firstName, customer.lastName);
+    .fetch();
 ]]></programlisting>
 
     <para>which is equivalent to the following native SQL</para>
 
-    <programlisting>  
+    <programlisting>
 SELECT c.first_name, c.last_name
-FROM customer c 
+FROM customer c
 ORDER BY c.last_name ASC, c.first_name ASC
 </programlisting>
 
@@ -597,17 +699,18 @@ ORDER BY c.last_name ASC, c.first_name ASC
 
     <para>Grouping can be done in the following form</para>
 
-    <programlisting language="java"><![CDATA[ 
-query.from(customer)
+    <programlisting language="java"><![CDATA[
+queryFactory.select(customer.lastName)
+    .from(customer)
     .groupBy(customer.lastName)
-    .list(customer.lastName);
+    .fetch();
 ]]></programlisting>
 
     <para>which is equivalent to the following native SQL</para>
 
-    <programlisting>  
-SELECT c.last_name 
-FROM customer c 
+    <programlisting>
+SELECT c.last_name
+FROM customer c
 GROUP BY c.last_name
 </programlisting>
 
@@ -619,46 +722,47 @@ GROUP BY c.last_name
 
     <title>Using Subqueries</title>
 
-    <para>
-      To create a subquery you create a SQLSubQuery instance, define the query parameters via
-      from, where etc and use unique or list to create a subquery, which is just a type-safe Querydsl
-      expression for the query. unique is used for a unique (single) result and list for a
-      list result.
+    <para>To create a subquery you can use one of the factory methods of <code>SQLExpressions</code>
+      and add the query parameters via from, where etc.
     </para>
 
-    <programlisting language="java"><![CDATA[ 
+    <programlisting language="java"><![CDATA[
 QCustomer customer = QCustomer.customer;
 QCustomer customer2 = new QCustomer("customer2");
-query.from(customer).where(
-  customer.status.eq(new SQLSubQuery().from(customer2).unique(customer2.status.max()))
-  .list(customer.all())  
+queryFactory.select(customer.all())
+    .from(customer)
+    .where(customer.status.eq(
+        SQLExpressions.select(customer2.status.max()).from(customer2)))
+    .fetch()
 ]]></programlisting>
 
     <para>Another example</para>
 
-    <programlisting language="java"><![CDATA[ 
+    <programlisting language="java"><![CDATA[
 QStatus status = QStatus.status;
-query.from(customer).where(  
-  customer.status.in(new SQLSubQuery().from(status).where(status.level.lt(3)).list(status.id))  
-  .list(customer.all())    
+queryFactory.select(customer.all())
+    .from(customer)
+    .where(customer.status.in(
+        SQLExpressions.select(status.id).from(status).where(status.level.lt(3))))
+    .fetch();
 ]]></programlisting>
 
   </sect2>
 
   <sect2>
-  
-    <title>Selecting literals</title>
-    
-    <para>To select literals you need to create constant instances for them like this:</para>
-    
-    <programlisting language="java"><![CDATA[
-query.list(Expressions.constant(1),
-           Expressions.constant("abc"));    
-]]></programlisting>     
 
-    <para>The class  <code>com.mysema.query.support.Expressions</code> offers also other useful static methods for
+    <title>Selecting literals</title>
+
+    <para>To select literals you need to create constant instances for them like this:</para>
+
+    <programlisting language="java"><![CDATA[
+queryFactory.select(Expressions.constant(1),
+                    Expressions.constant("abc"));
+]]></programlisting>
+
+    <para>The class  <code>com.querydsl.core.types.dsl.Expressions</code> offers also other useful static methods for
     projections, operation and template creation.</para>
-  
+
   </sect2>
 
   <sect2>
@@ -670,78 +774,117 @@ query.list(Expressions.constant(1),
       in the given MySQLQuery example:
     </para>
 
-    <programlisting language="java"><![CDATA[          
-public class MySQLQuery extends AbstractSQLQuery<MySQLQuery> {
-    
+    <programlisting language="java"><![CDATA[
+public class MySQLQuery<T> extends AbstractSQLQuery<T, MySQLQuery<T>> {
+
     public MySQLQuery(Connection conn) {
         this(conn, new MySQLTemplates(), new DefaultQueryMetadata());
     }
-    
+
     public MySQLQuery(Connection conn, SQLTemplates templates) {
         this(conn, templates, new DefaultQueryMetadata());
     }
-    
+
     protected MySQLQuery(Connection conn, SQLTemplates templates, QueryMetadata metadata) {
         super(conn, new Configuration(templates), metadata);
     }
-    
-    public MySQLQuery bigResult(){
+
+    public MySQLQuery bigResult() {
         return addFlag(Position.AFTER_SELECT, "SQL_BIG_RESULT ");
     }
-    
-    public MySQLQuery bufferResult(){
+
+    public MySQLQuery bufferResult() {
         return addFlag(Position.AFTER_SELECT, "SQL_BUFFER_RESULT ");
     }
- 
- 
-    // ...   
-}        
+
+
+    // ...
+}
 ]]></programlisting>
 
     <para>
       The flags are custom SQL snippets that can be inserted at specific points in the
       serialization. The supported positions are the enums of the
-      <code>com.mysema.query.QueryFlag.Position</code> enum class.
+      <code>com.querydsl.core.QueryFlag.Position</code> enum class.
     </para>
 
   </sect2>
-  
+
   <sect2>
-  
+
     <title>Window functions</title>
-    
+
     <para>Window functions are supported in Querydsl via the methods in the <code>SQLExpressions</code> class.</para>
-    
+
     <para>Usage example:</para>
-    
+
     <programlisting language="java"><![CDATA[
-query.from(employee)
-    .list(SQLExpressions.rowNumber()
+queryFactory.select(SQLExpressions.rowNumber()
         .over()
         .partitionBy(employee.name)
-        .orderBy(employee.id));
+        .orderBy(employee.id))
+     .from(employee)
 ]]></programlisting>
-  
+
   </sect2>
-  
+
   <sect2>
-  
+
+    <title>Common table expressions</title>
+
+    <para>Common table expressions are supported in Querydsl SQL via two syntax variants</para>
+
+    <programlisting language="java"><![CDATA[
+QEmployee employee = QEmployee.employee;
+queryFactory.with(employee, SQLExpressions.select(employee.all)
+                                          .from(employee)
+                                          .where(employee.name.startsWith("A")))
+            .from(...)
+]]></programlisting>
+
+    <para>And using a column listing</para>
+
+    <programlisting language="java"><![CDATA[
+QEmployee employee = QEmployee.employee;
+queryFactory.with(employee, employee.id, employee.name)
+            .as(SQLExpressions.select(employee.id, employee.name)
+                              .from(employee)
+                              .where(employee.name.startsWith("A")))
+            .from(...)
+]]></programlisting>
+
+    <para>If the columns of the common table expression are a subset of an existing table or view
+    it is advisable to use a generated path type for it, e.g. QEmployee in this case, but if the
+    columns don't fit any existing table PathBuilder can be used instead.</para>
+
+    <para>Below is an example for such a case</para>
+
+    <programlisting language="java"><![CDATA[
+QEmployee employee = QEmployee.employee;
+QDepartment department = QDepartment.department;
+PathBuilder<Tuple> emp = new PathBuilder<Tuple>(Tuple.class, "emp");
+queryFactory.with(emp, SQLExpressions.select(employee.id, employee.name, employee.departmentId,
+                                          department.name.as("departmentName"))
+                                      .from(employee)
+                                      .innerJoin(department).on(employee.departmentId.eq(department.id))))
+            .from(...)
+]]></programlisting>
+
+  </sect2>
+
+  <sect2>
+
     <title>Other SQL expressions</title>
-    
+
     <para>
     Other SQL expressions are also available from the <code>SQLExpressions</code> class as static methods.
     </para>
-  
+
   </sect2>
 
   <sect2>
 
     <title>Using Data manipulation commands</title>
-
-    <para>All the DMLClause implementation in the Querydsl SQL module take three
-      parameters, the Connection, the SQLTemplates instance
-      used in the queries and the main entity the DMLClause is bound to.
-    </para>
 
     <sect3>
 
@@ -751,8 +894,8 @@ query.from(employee)
 
       <programlisting language="java"><![CDATA[
 QSurvey survey = QSurvey.survey;
-  
-new SQLInsertClause(conn, configuration, survey)
+
+queryFactory.insert(survey)
     .columns(survey.id, survey.name)
     .values(3, "Hello").execute();
 ]]></programlisting>
@@ -760,70 +903,70 @@ new SQLInsertClause(conn, configuration, survey)
       <para>Without columns</para>
 
       <programlisting language="java"><![CDATA[
-new SQLInsertClause(conn, configuration, survey)
+queryFactory.insert(survey)
     .values(4, "Hello").execute();
 ]]></programlisting>
 
       <para>With subquery</para>
 
       <programlisting language="java"><![CDATA[
-new SQLInsertClause(conn, configuration, survey)
+queryFactory.insert(survey)
     .columns(survey.id, survey.name)
-    .select(new SQLSubQuery().from(survey2).list(survey2.id.add(1), survey2.name))
+    .select(SQLExpressions.select(survey2.id.add(1), survey2.name).from(survey2))
     .execute();
 ]]></programlisting>
 
       <para>With subquery, without columns</para>
 
       <programlisting language="java"><![CDATA[
-new SQLInsertClause(conn, configuration, survey)
-    .select(new SQLSubQuery().from(survey2).list(survey2.id.add(10), survey2.name))
+queryFactory.insert(survey)
+    .select(SQLExpressions.select(survey2.id.add(10), survey2.name).from(survey2))
     .execute();
 ]]></programlisting>
 
     <para>As an alternative to the columns/values usage, Querydsl provides also a set
      method which can be used like this</para>
-    
+
     <programlisting language="java"><![CDATA[
 QSurvey survey = QSurvey.survey;
-  
-new SQLInsertClause(conn, configuration, survey)
+
+queryFactory.insert(survey)
     .set(survey.id, 3)
     .set(survey.name, "Hello").execute();
-]]></programlisting>    
+]]></programlisting>
 
-     <para>which is equivalent to the first example. Usage of the set method always 
+     <para>which is equivalent to the first example. Usage of the set method always
      expands internally to columns and values.</para>
-     
+
      <para>Beware that</para>
-     
+
      <programlisting language="java"><![CDATA[
 columns(...).select(...)
-]]></programlisting>    
+]]></programlisting>
 
      <para>maps the result set of the given query to be inserted whereas</para>
-     
+
      <para>To get the created keys out instead of modified rows count use one of the executeWithKey/s method.</para>
 
 <programlisting language="java"><![CDATA[
 set(...)
-]]></programlisting>    
+]]></programlisting>
 
      <para>maps single columns and nulls are used for empty subquery results.</para>
-     
+
      <para>To populate a clause instance based on the contents of a bean you can use</para>
 
     <programlisting language="java"><![CDATA[
-new SQLInsertClause(conn, configuration, survey)
+queryFactory.insert(survey)
     .populate(surveyBean).execute();
 ]]></programlisting>
 
     <para>This will exclude null bindings, if you need also null bindings use</para>
-    
+
     <programlisting language="java"><![CDATA[
-new SQLInsertClause(conn, configuration, survey)
+queryFactory.insert(survey)
     .populate(surveyBean, DefaultMapper.WITH_NULL_BINDINGS).execute();
-]]></programlisting>    
+]]></programlisting>
 
     </sect3>
 
@@ -836,7 +979,7 @@ new SQLInsertClause(conn, configuration, survey)
       <programlisting language="java"><![CDATA[
 QSurvey survey = QSurvey.survey;
 
-new SQLUpdateClause(conn, configuration, survey)
+queryFactory.update(survey)
     .where(survey.name.eq("XXX"))
     .set(survey.name, "S")
     .execute();
@@ -844,19 +987,19 @@ new SQLUpdateClause(conn, configuration, survey)
 
       <para>Without where</para>
 
-      <programlisting language="java"><![CDATA[  
-new SQLUpdateClause(conn, configuration, survey)
+      <programlisting language="java"><![CDATA[
+queryFactory.update(survey)
     .set(survey.name, "S")
-    .execute(); 
+    .execute();
 ]]></programlisting>
 
     <para>Using bean population</para>
-    
+
 <programlisting language="java"><![CDATA[
-new SQLUpdateClause(conn, configuration, survey)
+queryFactory.update(survey)
     .populate(surveyBean)
     .execute();
-]]></programlisting>        
+]]></programlisting>
 
     </sect3>
 
@@ -869,17 +1012,17 @@ new SQLUpdateClause(conn, configuration, survey)
       <programlisting language="java"><![CDATA[
 QSurvey survey = QSurvey.survey;
 
-new SQLDelecteClause(conn, configuration, survey)
+queryFactory.delete(survey)
     .where(survey.name.eq("XXX"))
     .execute();
-    
+
 ]]></programlisting>
 
       <para>Without where</para>
 
-      <programlisting language="java"><![CDATA[  
-new SQLDelecteClause(conn, configuration, survey)
-    .execute()  
+      <programlisting language="java"><![CDATA[
+queryFactory.delete(survey)
+    .execute()
 ]]></programlisting>
 
     </sect3>
@@ -898,13 +1041,13 @@ new SQLDelecteClause(conn, configuration, survey)
 
     <para>Update:</para>
 
-    <programlisting language="java"><![CDATA[   	
+    <programlisting language="java"><![CDATA[
 QSurvey survey = QSurvey.survey;
 
-insert(survey).values(2, "A").execute();
-insert(survey).values(3, "B").execute();
+queryFactory.insert(survey).values(2, "A").execute();
+queryFactory.insert(survey).values(3, "B").execute();
 
-SQLUpdateClause update = update(survey);
+SQLUpdateClause update = queryFactory.update(survey);
 update.set(survey.name, "AA").where(survey.name.eq("A")).addBatch();
 update.set(survey.name, "BB").where(survey.name.eq("B")).addBatch();
 ]]></programlisting>
@@ -912,10 +1055,10 @@ update.set(survey.name, "BB").where(survey.name.eq("B")).addBatch();
     <para>Delete:</para>
 
     <programlisting language="java"><![CDATA[
-insert(survey).values(2, "A").execute();
-insert(survey).values(3, "B").execute();
+queryFactory.insert(survey).values(2, "A").execute();
+queryFactory.insert(survey).values(3, "B").execute();
 
-SQLDeleteClause delete = delete(survey);
+SQLDeleteClause delete = queryFactory.delete(survey);
 delete.where(survey.name.eq("A")).addBatch();
 delete.where(survey.name.eq("B")).addBatch();
 assertEquals(2, delete.execute());
@@ -924,7 +1067,7 @@ assertEquals(2, delete.execute());
     <para>Insert:</para>
 
     <programlisting language="java"><![CDATA[
-SQLInsertClause insert = insert(survey);
+SQLInsertClause insert = queryFactory.insert(survey);
 insert.set(survey.id, 5).set(survey.name, "5").addBatch();
 insert.set(survey.id, 6).set(survey.name, "6").addBatch();
 assertEquals(2, insert.execute());
@@ -940,13 +1083,13 @@ assertEquals(2, insert.execute());
     <para>To create JavaBean DTO types for the tables of your schema use the
       MetaDataExporter like this:</para>
 
-    <programlisting language="java"><![CDATA[  
+    <programlisting language="java"><![CDATA[
 java.sql.Connection conn = ...;
 MetaDataExporter exporter = new MetaDataExporter();
 exporter.setPackageName("com.myproject.mydomain");
-exporter.setTargetFolder(new File("src/main/java"))	;
-exporter.setBeanSerializer(new BeanSerializer());   
-exporter.export(conn.getMetaData());  
+exporter.setTargetFolder(new File("src/main/java"));
+exporter.setBeanSerializer(new BeanSerializer());
+exporter.export(conn.getMetaData());
 ]]></programlisting>
 
     <para>Now you can use the bean types as arguments to the populate method in DML
@@ -954,62 +1097,37 @@ exporter.export(conn.getMetaData());
       to bean types in queries. Here is a simple example in JUnit form:
     </para>
 
-    <programlisting language="java"><![CDATA[    	
+    <programlisting language="java"><![CDATA[
 QEmployee e = new QEmployee("e");
-   
+
 // Insert
 Employee employee = new Employee();
 employee.setFirstname("John");
-Integer id = insert(e).populate(employee).executeWithKey(e.id);
+Integer id = queryFactory.insert(e).populate(employee).executeWithKey(e.id);
 employee.setId(id);
 
 // Update
 employee.setLastname("Smith");
-assertEquals(1l, update(e).populate(employee).where(e.id.eq(employee.getId())).execute());
+assertEquals(1l, queryFactory.update(e).populate(employee).where(e.id.eq(employee.getId())).execute());
 
 // Query
-Employee smith = query().from(e).where(e.lastname.eq("Smith")).uniqueResult(e);
+Employee smith = queryFactory.selectFrom(e).where(e.lastname.eq("Smith")).fetchOne();
 assertEquals("John", smith.getFirstname());
 
-// Delete 
-assertEquals(1l, delete(e).where(e.id.eq(employee.getId())).execute());
-]]></programlisting>
-
-    <para>The factory methods used in the previous example are here:</para>
-
-    <programlisting language="java"><![CDATA[      	
-protected SQLUpdateClause update(RelationalPath<?> e){
-    return new SQLUpdateClause(Connections.getConnection(), templates, e);
-}
-
-protected SQLInsertClause insert(RelationalPath<?> e){
-    return new SQLInsertClause(Connections.getConnection(), templates, e);
-}
-
-protected SQLDeleteClause delete(RelationalPath<?> e){
-    return new SQLDeleteClause(Connections.getConnection(), templates, e);
-}
-
-protected SQLMergeClause merge(RelationalPath<?> e){
-    return new SQLMergeClause(Connections.getConnection(), templates, e);
-}
-
-protected SQLQuery query() {
-    return new SQLQuery(Connections.getConnection(), templates);  	
-}
-  	
+// Delete
+assertEquals(1l, queryFactory.delete(e).where(e.id.eq(employee.getId())).execute());
 ]]></programlisting>
 
   </sect2>
 
-<!-- 
+<!--
   <sect2>
 
     <title>Custom syntax expressions</title>
 
     <para>
       If you need to specify SQL function calls in Querydsl you can use TemplateExpressions to
-      express them. For general expressions you can use the SimpleTemplate class and for typed 
+      express them. For general expressions you can use the SimpleTemplate class and for typed
       expressions BooleanTemplate, ComparableTemplate, DateTemplate,
       DateTimeTemplate, EnumTemplate, NumberTemplate, StringTemplate and TimeTemplate.
     </para>
@@ -1019,7 +1137,7 @@ protected SQLQuery query() {
     <programlisting language="java"><![CDATA[
 Expression<?> arg1 = ...;
 Expression<?> arg2 = ...;
-Expression<String> expression = SimpleTemplate.create(String.class, "myfunction({0},{1})", arg1, arg2);		
+Expression<String> expression = SimpleTemplate.create(String.class, "myfunction({0},{1})", arg1, arg2);
 ]]></programlisting>
 
     <para>And here is an example for a Number typed template expression:</para>
@@ -1027,24 +1145,24 @@ Expression<String> expression = SimpleTemplate.create(String.class, "myfunction(
     <programlisting language="java"><![CDATA[
 Expression<?> arg1 = ...;
 Expression<?> arg2 = ...;
-NumberExpression<Integer> expression = NumberTemplate.create(Integer.class, "myfunction({0},{1})", arg1, arg2);		
+NumberExpression<Integer> expression = NumberTemplate.create(Integer.class, "myfunction({0},{1})", arg1, arg2);
 ]]></programlisting>
 
   </sect2>
- -->  
+ -->
 
   <sect2>
-  
+
     <title>Extracting the SQL query and bindings</title>
-    
+
     <para>The SQL query and bindings can be extracted via the getSQL method:</para>
-    
+
     <programlisting language="java"><![CDATA[
-SQLBindings bindings = query.getSQL(customer.id, customer.firstname, customer.lastname);
-System.out.println(bindings.getSQL()); 
-]]></programlisting>    
-    
-   <para>If you need also all literals in the SQL string you can enable literal serialization on the 
+SQLBindings bindings = query.getSQL();
+System.out.println(bindings.getSQL());
+]]></programlisting>
+
+   <para>If you need also all literals in the SQL string you can enable literal serialization on the
    query or configuration level via setUseLiterals(true).</para>
 
   </sect2>
@@ -1055,45 +1173,115 @@ System.out.println(bindings.getSQL());
 
     <para>Querydsl SQL provides the possibility to declare custom type mappings for
       ResultSet/Statement interaction. The custom type mappings can be
-      declared in com.mysema.query.sql.Configuration instances, which are supplied as constructor
+      declared in com.querydsl.sql.Configuration instances, which are supplied as constructor
       arguments to the actual queries:
     </para>
 
-    <programlisting language="java"><![CDATA[    
+    <programlisting language="java"><![CDATA[
 Configuration configuration = new Configuration(new H2Templates());
 // overrides the mapping for Types.DATE
-configuration.register(new UtilDateType());		
+configuration.register(new UtilDateType());
 ]]></programlisting>
 
     <para>And for a table column</para>
 
-    <programlisting language="java"><![CDATA[    
+    <programlisting language="java"><![CDATA[
 Configuration configuration = new Configuration(new H2Templates());
-// declares a maping for the gender column in the person table
+// declares a mapping for the gender column in the person table
 configuration.register("person", "gender",  new EnumByNameType<Gender>(Gender.class));
 ]]></programlisting>
 
     <para>To customize a numeric mapping you can use the registerNumeric method like this
     </para>
 
-    <programlisting language="java"><![CDATA[    
+    <programlisting language="java"><![CDATA[
 configuration.registerNumeric(5,2,Float.class);
 ]]></programlisting>
 
     <para>This will map the Float type to the NUMERIC(5,2) type.</para>
 
   </sect2>
-  
+
   <sect2>
-  
+
     <title>Listening to queries and clauses</title>
-    
+
     <para>SQLListener is a listener interface that can be used to listen to queries and DML clause. SQLListener
     instances can be registered either on the configuration and on the query/clause level via the addListener method.</para>
-  
-    <para>Use cases for listeners are data synchronization, logging, cacheing and validation.</para>
-  
+
+    <para>Use cases for listeners are data synchronization, logging, caching and validation.</para>
+
+  </sect2>
+
+  <sect2>
+
+    <title>Spring integration</title>
+
+    <para>Querydsl SQL integrates with Spring through the querydsl-sql-spring module:</para>
+
+    <programlisting language="xml"><![CDATA[
+<dependency>
+  <groupId>com.querydsl</groupId>
+  <artifactId>querydsl-sql-spring</artifactId>
+  <version>${querydsl.version}</version>
+</dependency>
+]]></programlisting>
+
+    <para>It provides Spring exception translation and a Spring connection provider for usage of Querydsl SQL
+    with Spring transaction managers. Below is a configuration example:</para>
+
+    <programlisting language="java"><![CDATA[
+package com.querydsl.example.config;
+
+import com.querydsl.sql.H2Templates;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.SQLTemplates;
+import com.querydsl.sql.spring.SpringConnectionProvider;
+import com.querydsl.sql.spring.SpringExceptionTranslator;
+import com.querydsl.sql.types.DateTimeType;
+import com.querydsl.sql.types.LocalDateType;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+
+@Configuration
+public class JdbcConfiguration {
+
+    @Bean
+    public DataSource dataSource() {
+        // implementation omitted
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource());
+    }
+
+    @Bean
+    public com.querydsl.sql.Configuration querydslConfiguration() {
+        SQLTemplates templates = H2Templates.builder().build(); //change to your Templates
+        com.querydsl.sql.Configuration configuration = new com.querydsl.sql.Configuration(templates);
+        configuration.setExceptionTranslator(new SpringExceptionTranslator());
+        return configuration;
+    }
+
+    @Bean
+    public SQLQueryFactory queryFactory() {
+        SpringConnectionProvider provider = new SpringConnectionProvider(dataSource());
+        return new SQLQueryFactory(querydslConfiguration(), provider);
+    }
+
+}
+]]></programlisting>
+
+
   </sect2>
 
 
-</sect1>    
+</sect1>

@@ -3,27 +3,28 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.mysema.querydsl</groupId>
+    <groupId>com.querydsl</groupId>
     <artifactId>querydsl-root</artifactId>
-    <version>3.3.3.BUILD-SNAPSHOT</version>
-    <relativePath>../querydsl-root/pom.xml</relativePath> 
+    <version>5.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.mysema.querydsl</groupId>
+  <groupId>com.querydsl</groupId>
   <artifactId>querydsl-apt</artifactId>
   <name>Querydsl - APT support</name>
   <description>APT based Source code generation for Querydsl</description>
+  <url>${project.homepage}</url>
   <packaging>jar</packaging>
 
-  <properties>
-    <hibernate.version>4.2.0.Final</hibernate.version>
-    <jdo.version>2.3-eb</jdo.version>
-    <morphia.version>0.105</morphia.version>
-  </properties>
+  <scm>
+    <connection>${project.checkout}</connection>
+    <developerConnection>${project.checkout}</developerConnection>
+    <url>${project.githubpage}</url>
+  </scm>
 
   <dependencies>
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-codegen</artifactId>
       <version>${project.version}</version>
       <exclusions>
@@ -33,18 +34,23 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
-    <!-- provided -->    
     <dependency>
-      <groupId>javax.jdo</groupId>
-      <artifactId>jdo2-api</artifactId>
-      <version>${jdo.version}</version>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>20.1.0</version>
       <scope>provided</scope>
-    </dependency>    
+    </dependency>
     <dependency>
-      <groupId>org.hibernate.javax.persistence</groupId>
-      <artifactId>hibernate-jpa-2.0-api</artifactId>
-      <version>1.0.0.Final</version>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>2.2.3</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- provided -->
+    <dependency>
+      <groupId>org.datanucleus</groupId>
+      <artifactId>javax.jdo</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -78,7 +84,7 @@
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
-      <version>1.6</version>
+      <version>${jodatime.version}</version>
       <scope>test</scope>
     </dependency>  
     <dependency>
@@ -86,6 +92,12 @@
       <artifactId>hibernate-core</artifactId>
       <version>${hibernate.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>javassist</artifactId>
+          <groupId>org.javassist</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>     
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -94,7 +106,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-core</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
@@ -111,7 +123,6 @@
     <dependency>
       <groupId>org.eclipse.jdt.core.compiler</groupId>
       <artifactId>ecj</artifactId>
-      <version>3.7.1</version>
       <scope>test</scope>
     </dependency>
             
@@ -121,21 +132,34 @@
     <plugins>
     <!-- 
       <plugin>
-        <groupId>com.mysema.querydsl</groupId>
+        <groupId>com.querydsl</groupId>
         <artifactId>querydsl-maven-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
           <testClasspath>true</testClasspath>
           <targetFolder>target/genericExporter</targetFolder>
           <packages>
-            <package>com.mysema.query.domain</package>
+            <package>com.querydsl.core.domain</package>
           </packages>
         </configuration>
       </plugin>
        -->
+
       <plugin>
-        <groupId>com.springsource.bundlor</groupId>
-        <artifactId>com.springsource.bundlor.maven</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>com.querydsl.apt</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
       </plugin>    
          
       <plugin>
@@ -143,7 +167,25 @@
         <configuration>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
-      </plugin>  
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.transformer</groupId>
+        <artifactId>org.eclipse.transformer.maven</artifactId>
+        <version>0.2.0</version>
+        <executions>
+          <execution>
+            <id>jakarta-ee</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <classifier>jakarta</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -160,6 +202,7 @@
                 <descriptor>src/main/hibernate.xml</descriptor>
                 <descriptor>src/main/jdo.xml</descriptor>
                 <descriptor>src/main/jpa.xml</descriptor>
+                <descriptor>src/main/jakarta.xml</descriptor>
                 <descriptor>src/main/morphia.xml</descriptor>
                 <descriptor>src/main/roo.xml</descriptor>
                 <descriptor>src/main/onejar.xml</descriptor>
@@ -169,7 +212,7 @@
           </execution>    
         </executions>        
       </plugin>         
-         
+
       <plugin>
         <groupId>com.mysema.maven</groupId>
         <artifactId>apt-maven-plugin</artifactId>
@@ -182,12 +225,12 @@
             </goals>
             <configuration>
               <outputDirectory>target/generated-test-sources/java</outputDirectory>
-              <showWarnings>true</showWarnings>
+              <logOnlyOnError>true</logOnlyOnError>
               <processors>
-                <processor>com.mysema.query.apt.QuerydslAnnotationProcessor</processor>
-                <processor>com.mysema.query.apt.hibernate.HibernateAnnotationProcessor</processor> 
-                <processor>com.mysema.query.apt.jdo.JDOAnnotationProcessor</processor>
-                <processor>com.mysema.query.apt.roo.RooAnnotationProcessor</processor>
+                <processor>com.querydsl.apt.QuerydslAnnotationProcessor</processor>
+                <processor>com.querydsl.apt.hibernate.HibernateAnnotationProcessor</processor>
+                <processor>com.querydsl.apt.jdo.JDOAnnotationProcessor</processor>
+                <processor>com.querydsl.apt.roo.RooAnnotationProcessor</processor>
               </processors>              
             </configuration>
           </execution>                            
@@ -216,5 +259,13 @@
        -->
     </plugins>
   </build>
+
+  <repositories>
+    <!--for org.springframework.roo:org.springframework.roo.annotations -->
+    <repository>
+      <id>spring roo repository</id>
+      <url>http://spring-roo-repository.springsource.org/release</url>
+    </repository>
+  </repositories>
   
 </project>

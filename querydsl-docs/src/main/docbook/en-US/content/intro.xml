@@ -7,7 +7,7 @@
     <title>Background</title>
 
     <para>
-      Querydsl was born out of the need to maintain HQL queries in a typesafe way.
+      Querydsl was born out of the need to maintain HQL queries in a typesafe way.       
       Incremental construction of HQL queries requires String concatenation and results
       in hard to read code. Unsafe references to domain types and properties
       via plain Strings were another issue with String based HQL construction.
@@ -23,6 +23,10 @@
       HQL for Hibernate was the first target language for Querydsl, but nowadays it
       supports JPA, JDO, JDBC, Lucene, Hibernate Search, MongoDB, Collections and RDFBean
       as backends.
+    </para>
+    
+    <para>
+      If you are completely new to database access in Java,<ulink url="https://www.marcobehler.com/guides/a-guide-to-accessing-databases-in-java">https://www.marcobehler.com/guides/a-guide-to-accessing-databases-in-java</ulink> contains a good overview of the various parts, pieces and options and shows you where exactly QueryDSL fits in.
     </para>
 
   </sect1>
@@ -45,16 +49,11 @@
     </para>
 
     <para>
-      All query instances can be reused multiple times. After the projection the paging data 
-      (limit and offset) and the definition of the projection are removed.
-    </para>
-
-    <para>
       To get an impression of the expressivity of the Querydsl query and expression types go to
-      the javadocs and explore <code>com.mysema.query.Query</code>, <code>com.mysema.query.Projectable</code> 
-      and <code>com.mysema.query.types.Expression</code>.
+      the javadocs and explore <code>com.querydsl.core.Query</code>, <code>com.querydsl.core.Fetchable</code>
+      and <code>com.querydsl.core.types.Expression</code>.
     </para>
 
   </sect1>
 
-</chapter>    
+</chapter>

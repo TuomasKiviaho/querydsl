@@ -4,34 +4,40 @@ Querydsl is a framework which enables the construction of type-safe SQL-like que
 
 Instead of writing queries as inline strings or externalizing them into XML files they are constructed via a fluent API.
 
+[![Website shields.io](https://img.shields.io/website-up-down-green-red/http/querydsl.github.io.svg)](https://querydsl.github.io/)
+[![Build Status](https://github.com/querydsl/querydsl/workflows/querydsl/badge.svg)](https://github.com/querydsl/querydsl/actions)
+[![Coverage Status](https://coveralls.io/repos/github/querydsl/querydsl/badge.svg?branch=master)](https://coveralls.io/github/querydsl/querydsl?branch=master)
+[![Stackoverflow](https://img.shields.io/badge/StackOverflow-querydsl-yellow.svg)](https://stackoverflow.com/questions/tagged/querydsl)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.querydsl/querydsl-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.querydsl/querydsl-core/)
+
 **Getting started**
 
 Use these tutorials to get started
 
 * [Querying JPA](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration)
 * [Querying SQL](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s03.html)
+* [Querying Mongodb](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s07.html)
+* [Querying Lucene](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s05.html)
+* [Querying Collections](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s08.html)
+* [Querydsl Spatial](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s04.html)
 * [Querying JDO](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s02.html)
-* [Querying Mongodb](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s06.html)
-* [Querying Lucene](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s04.html)
-* [Querying Collections](http://www.querydsl.com/static/querydsl/latest/reference/html/ch02s07.html)
 
 **Examples**
 
-Querydsl example projects
-
-* [Querydsl JPA example](https://github.com/mysema/querydsl-jpa-example)
-* [Querydsl SQL example](https://github.com/mysema/querydsl-sql-example)
+[Querydsl example projects](https://github.com/querydsl/querydsl/tree/master/querydsl-examples)
 
 **Support**
 
-Free support is provided in the Querydsl Google Group https://groups.google.com/forum/#!forum/querydsl
+Free support is provided in the [Querydsl Google Group](https://groups.google.com/forum/#!forum/querydsl) and on [StackOverflow](http://stackoverflow.com/questions/tagged/querydsl).
 
 **How to build**
 
-Querydsl provides releases via public Maven repositories, but you can build the sources also yourself like this
+Querydsl provides releases via public Maven repositories, but you can also build the sources yourself like this
 
-    cd querydsl-root
-    mvn -DskipTests=true clean install 
+```BASH
+$ mvn -Pquickbuild,{projectname} clean install
+```
+Where projectname is one of the Maven profiles (e.g. `jpa`, `sql`, `mongodb`, etc. or `all`)
 
 For more information visit the project homepage at http://www.querydsl.com/.
 
@@ -50,10 +56,10 @@ place it in the ```devops``` directory.
 
 To launch the virtual machine:
 
-```
-$> cd devops
-devops$> librarian-puppet install
-devops$> vagrant up
+```BASH
+$ cd devops
+$ librarian-puppet install
+$ vagrant up
 ``` 
 
 All of the databases' default ports are forwarded to the host machine. See the Vagrantfile for details.

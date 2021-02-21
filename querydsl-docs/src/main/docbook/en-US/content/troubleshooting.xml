@@ -14,21 +14,21 @@
     <para>When using improperly encoded fields or getters you might the following
       stacktrace:</para>
 
-    <programlisting><![CDATA[    
-java.lang.RuntimeException: Caught exception for field com.mysema.query.jdoql.testdomain.Store#products
-  at com.mysema.query.apt.Processor$2.visitType(Processor.java:117)
-  at com.mysema.query.apt.Processor$2.visitType(Processor.java:80)
+    <programlisting><![CDATA[
+java.lang.RuntimeException: Caught exception for field com.querydsl.jdo.testdomain.Store#products
+  at com.querydsl.apt.Processor$2.visitType(Processor.java:117)
+  at com.querydsl.apt.Processor$2.visitType(Processor.java:80)
   at com.sun.tools.javac.code.Symbol$ClassSymbol.accept(Symbol.java:827)
-  at com.mysema.query.apt.Processor.getClassModel(Processor.java:154)
-  at com.mysema.query.apt.Processor.process(Processor.java:191)
+  at com.querydsl.apt.Processor.getClassModel(Processor.java:154)
+  at com.querydsl.apt.Processor.process(Processor.java:191)
   ...
 Caused by: java.lang.IllegalArgumentException: Insufficient type arguments for List
-  at com.mysema.query.apt.APTTypeModel.visitDeclared(APTTypeModel.java:112)
-  at com.mysema.query.apt.APTTypeModel.visitDeclared(APTTypeModel.java:40)
+  at com.querydsl.apt.APTTypeModel.visitDeclared(APTTypeModel.java:112)
+  at com.querydsl.apt.APTTypeModel.visitDeclared(APTTypeModel.java:40)
   at com.sun.tools.javac.code.Type$ClassType.accept(Type.java:696)
-  at com.mysema.query.apt.APTTypeModel.<init>(APTTypeModel.java:55)
-  at com.mysema.query.apt.APTTypeModel.get(APTTypeModel.java:48)
-  at com.mysema.query.apt.Processor$2.visitType(Processor.java:114)
+  at com.querydsl.apt.APTTypeModel.<init>(APTTypeModel.java:55)
+  at com.querydsl.apt.APTTypeModel.get(APTTypeModel.java:48)
+  at com.querydsl.apt.Processor$2.visitType(Processor.java:114)
   ... 35 more
 ]]></programlisting>
 
@@ -38,11 +38,11 @@ Caused by: java.lang.IllegalArgumentException: Insufficient type arguments for L
 
     <programlisting language="java"><![CDATA[
     private Collection names; // WRONG
-    
+
     private Collection<String> names; // RIGHT
-    
+
     private Map employeesByName; // WRONG
-    
+
     private Map<String,Employee> employeesByName; // RIGHT
 ]]></programlisting>
 
@@ -59,45 +59,13 @@ Caused by: java.lang.IllegalArgumentException: Insufficient type arguments for L
     <para>An easy to use solution is to initialize the classes in a single thread before
       they are used in different threads.</para>
 
-    <para>The com.mysema.util.ClassPathUtils class can be used for that like this:</para>
+    <para>The com.querydsl.codegen.ClassPathUtils class can be used for that like this:</para>
 
     <programlisting language="java"><![CDATA[
     ClassPathUtils.scanPackage(Thread.currentThread().getContextClassLoader(), packageToLoad);
 ]]></programlisting>
 
     <para>Replace packageToLoad with the package of the classes you want to initialize.
-    </para>
-
-  </sect1>
-
-
-  <sect1>
-    <title>JDK5 usage</title>
-
-    <para>
-      When compiling your project with JDK 5, you might get the following compilation failure:
-    </para>
-
-    <programlisting><![CDATA[
-[INFO] ------------------------------------------------------------------------
-[ERROR] BUILD FAILURE
-[INFO] ------------------------------------------------------------------------
-[INFO] Compilation failure
-...
-class file has wrong version 50.0, should be 49.0
-]]></programlisting>
-
-    <para>
-      The class file version 50.0 is used by Java 6.0, and 49.0 is used by Java 5.0.
-    </para>
-
-    <para>
-      Querydsl is tested against JDK 6.0 only, as we use APT extensively, which is available only
-      since JDK 6.0.
-    </para>
-
-    <para>
-      If you want to use it with JDK 5.0 you might want to try to compile Querydsl yourself.
     </para>
 
   </sect1>

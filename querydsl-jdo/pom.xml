@@ -3,71 +3,69 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.mysema.querydsl</groupId>
+    <groupId>com.querydsl</groupId>
     <artifactId>querydsl-root</artifactId>
-    <version>3.3.3.BUILD-SNAPSHOT</version>
-    <relativePath>../querydsl-root/pom.xml</relativePath> 
+    <version>5.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.mysema.querydsl</groupId>
+  <groupId>com.querydsl</groupId>
   <artifactId>querydsl-jdo</artifactId>
   <name>Querydsl - JDO support</name>
   <description>JDO support for Querydsl</description>
+  <url>${project.homepage}</url>
   <packaging>jar</packaging>
 
+  <scm>
+    <connection>${project.checkout}</connection>
+    <developerConnection>${project.checkout}</developerConnection>
+    <url>${project.githubpage}</url>
+  </scm>
+
   <properties>   
-    <dn.version>3.2.0-release</dn.version>
-    <dn.plugin.version>3.2.0-release</dn.plugin.version>
+    <dn.version>5.2.4</dn.version>
+    <dn.plugin.version>5.2.1</dn.plugin.version>
   </properties>
 
   <dependencies>
-  
+
+
     <dependency>
-      <groupId>javax.jdo</groupId>
-      <artifactId>jdo-api</artifactId>
-      <version>3.0.1</version>
+      <groupId>org.datanucleus</groupId>
+      <artifactId>javax.jdo</artifactId>
+      <scope>provided</scope>
     </dependency>
-    <!-- 
     <dependency>
-      <groupId>javax.jdo</groupId>
-      <artifactId>jdo2-api</artifactId>
-      <version>2.3-eb</version>
-   </dependency>
-     -->        
-    <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>20.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-codegen</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>        
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>        
     
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-sql</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
       <optional>true</optional> 
-    </dependency>      
-    
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>    
 
     <!-- test -->
 
@@ -99,12 +97,11 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>${h2.version}</version>
       <scope>test</scope>
     </dependency>    
     
     <dependency>
-      <groupId>com.mysema.querydsl</groupId>
+      <groupId>com.querydsl</groupId>
       <artifactId>querydsl-core</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
@@ -123,8 +120,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.springsource.bundlor</groupId>
-        <artifactId>com.springsource.bundlor.maven</artifactId>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
       </plugin>      
     
       <plugin>
@@ -142,6 +139,13 @@
             </configuration>              
           </execution>            
         </executions>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>com.querydsl.jdo</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin> 
         
       <!-- this plugin does the JDO class enhancement -->
@@ -151,7 +155,7 @@
         <version>${dn.plugin.version}</version>
         <configuration>
             <metadataDirectory>target/test-classes</metadataDirectory>
-            <metadataIncludes>com/mysema/query/jdo/test/domain/*.class</metadataIncludes>
+            <metadataIncludes>com/querydsl/jdo/test/domain/*.class</metadataIncludes>
             <log4jConfiguration>src/test/resources/log4j.properties</log4jConfiguration>
             <verbose>true</verbose>
             <props>src/test/resources/datanucleus.properties</props>
@@ -219,7 +223,7 @@
               </property>                  
             </systemProperties>    
             <includes>
-              <include>com/mysema/query/PackageVerification.java</include>
+              <include>com/querydsl/jdo/PackageVerification.java</include>
             </includes>
           </configuration>
           </execution>
@@ -237,20 +241,21 @@
             </goals>
             <configuration>
               <outputDirectory>target/generated-test-sources/java</outputDirectory>
-              <processor>com.mysema.query.apt.QuerydslAnnotationProcessor</processor>
+              <processor>com.querydsl.apt.QuerydslAnnotationProcessor</processor>
+              <logOnlyOnError>true</logOnlyOnError>
             </configuration>
           </execution>
         </executions>    
       </plugin>   
       
       <plugin>
-        <groupId>com.mysema.querydsl</groupId>
+        <groupId>com.querydsl</groupId>
         <artifactId>querydsl-maven-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
           <jdbcDriver>org.hsqldb.jdbcDriver</jdbcDriver>
           <jdbcUrl>jdbc:hsqldb:target/jdo</jdbcUrl>
-          <packageName>com.mysema.query.jdo.test.domain.sql</packageName>
+          <packageName>com.querydsl.jdo.test.domain.sql</packageName>
           <userName>sa</userName>
           <targetFolder>src/test/java</targetFolder>
           <namePrefix>S</namePrefix>
@@ -265,5 +270,20 @@
       </plugin>    
     </plugins>      
   </build>
+
+  <!--TODO upgrade dependencies and get rid of repositories and pluginRepositories -->
+  <repositories>
+    <repository>
+      <id>datanucleus</id>
+      <url>http://www.datanucleus.org/downloads/maven2</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>datanucleus</id>
+      <url>http://www.datanucleus.org/downloads/maven2</url>
+    </pluginRepository>
+  </pluginRepositories>
 
 </project>
